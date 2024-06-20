@@ -88,6 +88,8 @@ public:
   const std::string & getExternalTriggerInMode() const { return (triggerInMode_); }
   const std::string & getSyncMode() const { return (syncMode_); }
   const std::string & getSensorVersion() const { return (sensorVersion_); }
+  const std::string & getFromFile() const { return (fromFile_); }
+  const std::string & getEncodingFormat() const { return (encodingFormat_); }
 
   void setSerialNumber(const std::string & sn) { serialNumber_ = sn; }
   void setFromFile(const std::string & f) { fromFile_ = f; }
@@ -109,6 +111,7 @@ public:
     ercMode_ = mode;
     ercRate_ = rate;
   }
+  void setMIPIFramePeriod(int usec) { mipiFramePeriod_ = usec; }
 
   bool triggerActive() const
   {
@@ -136,6 +139,7 @@ private:
     const std::string & mode_in, const std::string & mode_out, const int period,
     const double duty_cycle);
   void configureEventRateController(const std::string & mode, const int rate);
+  void configureMIPIFramePeriod(int usec, const std::string & sensorName);
   void printStatistics();
   // ------------ variables
   CallbackHandler * callbackHandler_{0};
@@ -164,8 +168,10 @@ private:
   HardwarePinConfig hardwarePinConfig_;
   std::string ercMode_;
   int ercRate_;
+  int mipiFramePeriod_{-1};
   std::string loggerName_{"driver"};
   std::vector<int> roi_;
+  std::string encodingFormat_{"unknown"};
   std::string sensorVersion_{"0.0"};
   // --  related to statistics
   double statsInterval_{2.0};  // time between printouts

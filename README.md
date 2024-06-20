@@ -21,7 +21,7 @@ The events can be decoded and displayed using the following ROS/ROS2 packages:
   has C++ routines to decode event_camera_msgs.
 - [event_camera_py](https://github.com/ros-event-camera/event_camera_py)
   module for fast event decoding in python.
-- [event_camera_viewer](https://github.com/ros-event-camera/event_camera_viewer)
+- [event_camera_renderer](https://github.com/ros-event-camera/event_camera_renderer)
   a node / nodelet that renders and publishes ROS image messages.
 - [event_camera_tools](https://github.com/ros-event-camera/event_camera_tools)
   a set of tools to echo, monitor performance and convert
@@ -32,15 +32,19 @@ The events can be decoded and displayed using the following ROS/ROS2 packages:
 Tested on the following platforms:
 
 - ROS Noetic
-- ROS2 Galactic / Humble
+- ROS2 Humble (also compiles on other versions, see CI)
 - Ubuntu 20.04, 22.04 LTS
-- Metavision SDK (OpenEB) 2.2.2 - 4.0.1
+- Metavision SDK (OpenEB) 4.2.0
+
 
 Tested on the following hardware:
 
 - [SilkyEVCam VGA (Gen 3.1 sensor)](https://centuryarks.com/en/silkyevcam-vga/)
 - [SilkyEVCam HD (Gen 4 sensor)](https://centuryarks.com/en/silkyevcam-hd/)
 - [Prophesee EVK4 (Gen 4 sensor)](https://www.prophesee.ai/event-camera-evk4/)
+
+Explicitly not supported: any data in the old EVT2 format. The sensor
+must produce data in the EVT3 format or later.
 
 ## How to build
 
@@ -114,12 +118,15 @@ Parameters:
 - ``bias_file``: path to file with camera biases. See example in the
   ``biases`` directory.
 - ``from_file``: path to Metavision raw file. Instead of opening
-  camera, driver plays back data from this file.
+  camera, driver plays back data from this file. This will not be in
+  real time, usually faster.
 - ``serial``: specifies serial number of camera to open (useful for
   stereo). To learn serial number format first start driver without
   specifying serial number and look at the log files.
 - ``event_message_time_threshold``: (in seconds) minimum time span of
   events to be aggregated in one ROS event message before message is sent. Defaults to 1ms.
+  In its default setting however the SDK provides packets only every 4ms. To increase SDK
+  callback frequency, tune ``mipi_frame_period`` if available for your sensor.
 - ``event_message_size_threshold``: (in bytes) minimum size of events
   (in bytes) to be aggregated in one ROS event message before message is sent. Defaults to 1MB.
 - ``statistics_print_interval``: time in seconds between statistics printouts.
@@ -142,6 +149,8 @@ Parameters:
 - ``erc_mode``: event rate control mode (Gen4 sensor): ``na``,
   ``disabled``, ``enabled``. Default: ``na``.
 - ``erc_rate``: event rate control rate (Gen4 sensor) events/sec. Default: 100000000.
+- ``mipi_frame_period``:: mipi frame period in usec. Only available on some sensors.
+    Tune this to get faster callback rates from the SDK to the ROS driver. For instance 1008 will give a callback every millisecond. Risk of data corruption when set too low! Default: -1 (not set).
 - ``sync_mode``: Used to synchronize the time stamps across multiple
   cameras (tested for only 2). The cameras must be connected via a
   sync cable, and two separate ROS driver nodes are started, see
@@ -213,12 +222,12 @@ rosrun metavision_driver start_recording.py
 rosrun metavision_driver stop_recording.py
 ```
 
-To visualize the events, run a ``viewer`` node from the
-[event_camera_viewer](https://github.com/ros-event-camera/event_camera_viewer) package:
+To visualize the events, run a ``renderer`` node from the
+[event_camera_renderer](https://github.com/ros-event-camera/event_camera_renderer) package:
 ```
-roslaunch event_camera_viewer viewer.launch
+roslaunch event_camera_renderer renderer.launch
 ```
-The viewer node publishes an image that can be visualized with e.g. ``rqt_image_view``
+The renderer node publishes an image that can be visualized with e.g. ``rqt_image_view``
 
 
 # How to use (ROS2):
@@ -242,12 +251,12 @@ ros2 run rosbag2_composable_recorder start_recording.py
 ```
 To stop the recording you have to kill (Ctrl-C) the recording driver.
 
-To visualize the events, run a ``viewer`` node from the
-[event_camera_viewer](https://github.com/ros-event-camera/event_camera_viewer) package:
+To visualize the events, run a ``renderer`` node from the
+[event_camera_renderer](https://github.com/ros-event-camera/event_camera_renderer) package:
 ```
-ros2 launch event_camera_viewer viewer.launch.py
+ros2 launch event_camera_renderer renderer.launch.py
 ```
-The viewer node publishes an image that can be visualized with e.g. ``rqt_image_view``
+The renderer node publishes an image that can be visualized with e.g. ``rqt_image_view``
 
 ## CPU load
 

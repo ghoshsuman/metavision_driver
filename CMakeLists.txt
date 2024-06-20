@@ -13,23 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 project(metavision_driver)
 
 include(FetchContent)
-
 
 find_package(MetavisionSDK COMPONENTS driver QUIET)
 
 # if metavision sdk is not present, download it into the build directory
 set(MUST_INSTALL_METAVISION FALSE)
 
-set(BUILD_TESTING_OLD ${BUILD_TESTING})
-set(BUILD_TESTING OFF CACHE INTERNAL "Build tests")
 if(NOT MetavisionSDK_FOUND)
+  message(STATUS "metavision SDK is not installed, must build it")
   # must set various variables for OpenEB *before* fetching openEB.
   # CMAKE_ARGS seems to not work for FetchContent_Declare()
-  set(COMPILE_3DVIEW OFF CACHE INTERNAL "Build 3d viewer")
+  # set(COMPILE_3DVIEW OFF CACHE INTERNAL "Build 3d viewer")
   set(COMPILE_PLAYER OFF CACHE INTERNAL "Build player")
   set(COMPILE_PYTHON3_BINDINGS OFF CACHE INTERNAL "build python3 bindings")
   set(UDEV_RULES_SYSTEM_INSTALL OFF CACHE INTERNAL "install udev rules")
@@ -39,16 +37,18 @@ if(NOT MetavisionSDK_FOUND)
   FetchContent_Declare(
     metavision
     GIT_REPOSITORY https://github.com/ros-event-camera/openeb.git
-    GIT_TAG   4.2.0-cmake_current_source_dir)
+    GIT_TAG   4.2.0-ros)
 
   FetchContent_MakeAvailable(metavision)
-
+  message(STATUS "metavision SDK fetched and made available")
   # do this to avoid the "install" target being run on the metavision sdk
   if(IS_DIRECTORY "${metavision_SOURCE_DIR}")
     set_property(DIRECTORY ${metavision_SOURCE_DIR} PROPERTY EXCLUDE_FROM_ALL YES)
   endif()
 
   set(MUST_INSTALL_METAVISION TRUE)
+else()
+  message(STATUS "metavision SDK is installed, not building it")
 endif()
 
 set(BUILD_TESTING ON CACHE BOOL INTERNAL "Build tests")
