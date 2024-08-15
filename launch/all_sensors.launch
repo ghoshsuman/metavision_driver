@@ -1,0 +1,13 @@
+<launch>
+<include file="$(find metavision_driver)/launch/recording_stereo_driver.launch">
+	<arg name="bag" value="/mnt/RIPHD4TB/data/tub-rip-recordings/trial02/events.bag"/>
+</include>
+<include file="$(find realsense2_camera)/launch/rs_aligned_depth.launch"/>
+<include file="$(find event_camera_renderer)/launch/renderer_stereo.launch"/>
+<include file="$(find natnet_ros_cpp)/launch/gui_natnet_ros.launch"/>
+
+<node type="rviz" name="rviz" pkg="rviz" args="-d $(find metavision_driver)/stereo_evk4.rviz" />
+
+<!--<node pkg="rosbag" type="record" name="rosbag_record_frames" args="record -o /mnt/RIPHD4TB/data/tub-rip-recordings/trial02/frames.bag /natnet_ros/evStereoRig/pose /camera/color/image_raw /camera/aligned_depth_to_color/image_raw"/> -->
+
+</launch>

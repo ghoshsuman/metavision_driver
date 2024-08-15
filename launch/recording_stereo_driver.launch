@@ -1,5 +1,6 @@
 <launch>
   <arg name="bag"/>
+  <arg name="bias_file" default="$(find metavision_driver)/config/evk4.bias"/>
   <!-- manager node -->
   <node pkg="nodelet" type="nodelet" name="recording_driver"
 	args="manager" output="screen"/>
@@ -17,15 +18,18 @@
     clear_params="true" output="screen">
     <param name="frame_id" value="event_cam_0"/>
     <param name="sync_mode" value="primary"/>
+    <param name="trigger_in_mode" value="external"/>
+    <rosparam command="load" file="$(find metavision_driver)/config/trigger_pins_stereo_custom.yaml"/>
     <param name="event_message_time_threshold" value="0.0001"/>
     <!-- time interval between printout of rate statistics -->
     <param name="statistics_print_interval" value="2.0"/>
     <!-- from where to load the bias file (if any)  -->
     <param name="bias_file" value="$(arg bias_file)"/>
     <!-- run in multithreaded mode -->
-    <param name="use_multithreading" value="false"/>
+    <param name="use_multithreading" value="true"/>
     <!-- listen for ready message from cam 1 -->
     <remap from="~ready" to ="/event_cam_1/ready"/>
+    <param name="serial" value="00050673" type="string"/>
   </node>
 
   <!-- cam 1 -->
@@ -34,12 +38,15 @@
     clear_params="true" output="screen">
     <param name="frame_id" value="event_cam_1"/>
     <param name="sync_mode" value="secondary"/>
+    <param name="trigger_in_mode" value="external"/>
+    <rosparam command="load" file="$(find metavision_driver)/config/trigger_pins_stereo_custom.yaml"/>
     <param name="event_message_time_threshold" value="0.0001"/>
     <!-- time interval between printout of rate statistics -->
     <param name="statistics_print_interval" value="2.0"/>
     <!-- from where to load the bias file (if any)  -->
     <param name="bias_file" value="$(arg bias_file)"/>
     <!-- run in multithreaded mode -->
-    <param name="use_multithreading" value="false"/>
+    <param name="use_multithreading" value="true"/>
+    <param name="serial" value="00050675" type="string"/>
   </node>
 </launch>
